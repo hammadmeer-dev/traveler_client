@@ -102,13 +102,39 @@ export const CreatePost = () => {
   };
 
   return (
-    <>
-      <div className=" md:min-h-24 min-h-16 bg-gradient-to-r from-blue-400 to-teal-400 text-white py-4 text-center"></div>
-      <div className="mt-2 md:mx-20 mx-4 flex justify-center">
-        <div className=" bg-[#E5E5E5] md:bg-gradient-to-br from-white to-blue-50 max-w-2xl md:p-8 md:rounded-xl md:shadow-2xl md:transition-shadow md:hover:shadow-3xl">
-          <h1 className="text-4xl font-extrabold mb-8 text-center text-bgPrimary tracking-wide drop-shadow-sm">
-            Create Your Journey Post
-          </h1>
+    <div className="md:min-h-24 min-h-16 bg-gradient-to-r from-blue-400 to-teal-400 md:mx-20 mx-4 flex justify-center">
+           <div className="bg-gradient-to-br from-white to-blue-50 max-w-2xl p-8 rounded-xl shadow-2xl transition-shadow hover:shadow-3xl">
+        <h1 className="text-4xl font-extrabold mb-8 text-center text-bgPrimary tracking-wide drop-shadow-sm">
+          Create Your Journey Post
+        </h1>
+
+        <div className="p-6 bg-white rounded-xl shadow-lg">
+          <div className="flex items-center gap-4 mb-8">
+            <img
+              src={myProfile?.profilePicture?.url}
+              alt="User Profile"
+              className="w-14 h-14 object-cover rounded-full ring-2 ring-bgPrimary shadow-md"
+            />
+            <div>
+              <p className="text-xl font-semibold text-gray-800">
+                {myProfile.fullname}
+              </p>
+              <div className="flex items-center gap-1 text-bgPrimary font-medium">
+                <CiLocationOn className="text-2xl" />
+                <span className="text-md">{loc}</span>
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <input
+              type="text"
+              placeholder="Post Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="border border-gray-300 p-4 w-full rounded-lg text-lg font-medium placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-bgPrimary transition"
+              required
+            />
 
           <div className="md:p-6 bg-[#E5E5E5] md:bg-white md:rounded-xl md:shadow-lg">
             <div className="flex items-center gap-4 mb-8">
