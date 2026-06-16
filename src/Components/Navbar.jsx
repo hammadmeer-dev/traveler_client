@@ -136,7 +136,11 @@ const Navbar = () => {
         </Link>
 
         {/* Desktop Menu */}
-        <div className={`justify-center hidden ${isLoggedIn ? "md:block" : "md:hidden"}`}>
+        <div
+          className={`justify-center hidden ${
+            isLoggedIn ? "md:block" : "md:hidden"
+          }`}
+        >
           <ul className="flex gap-7 text-white text-lg font-semibold">
             {menuItems}
           </ul>

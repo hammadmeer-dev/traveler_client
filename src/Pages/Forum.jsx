@@ -15,17 +15,18 @@ const Forum = () => {
   const feed = useSelector((state) => state.feed.feed);
   const followerPosts = feed.filter((post) =>myProfile?.following?.includes(post.owner._id))
   const myPosts = feed.filter((post) => post.owner._id === myProfile._id);
+  
   return (
     <div className="bg-gray-100 h-screen">
       {/* Header Section */}
-          <div className=" md:min-h-24 min-h-16 bg-gradient-to-r from-blue-400 to-teal-400 text-white md:py-4 text-center">
+          <div className=" md:min-h-24 min-h-16 bg-gradient-to-r from-blue-400 to-teal-400 text-white md:py-4 text-center ">
     </div>
 
       {/* Content Section */}
       <div className="md:container md:h-4/5 h-dvh mx-auto md:mt-4 grid grid-cols-1 md:grid-cols-12 md:gap-4  sm:gap-2 md:px-4">
         {/* Sidebar Section */}
         <div className="col-span-12 md:col-span-3">
-          <div className="sticky top-24 h-full bg-white md:shadow md:rounded-lg  p-4" style={{ boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)" }}>
+          <div className="sticky top-24 h-full bg-white md:shadow md:rounded-lg  px-4 py-1" style={{ boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)" }}>
             <Sidebar active={active} setActive={setActive} />
           </div>
         </div>

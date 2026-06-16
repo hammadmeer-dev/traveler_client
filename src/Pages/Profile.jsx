@@ -203,7 +203,7 @@ const Profile = () => {
                 aria-label="Like post"
                 className={`flex items-center text-right  space-x-1 cursor-pointer ${
                   isPopupOpen ? "text-blue-500" : "text-gray-700"
-                } hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-150 ease-in-out rounded-full bg-slate-200 px-2 py-1`}
+                } hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-150 ease-in-out rounded-full px-2 py-1`}
                 onClick={handleShareClick}
               >
                 <FaShare className="text-xl" />

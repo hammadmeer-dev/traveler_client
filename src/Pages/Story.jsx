@@ -77,9 +77,13 @@ const Story = () => {
     <div className="min-h-screen">
       {/* Title Section */}
       <Header />
-      <div className="flex flex-col md:flex-row">
+      <div className="flex flex-col md:flex-row h-screen">
+        {" "}
+        {/* Change here */}
         {/* Map Section */}
-        <div className="flex-grow min-h-screen md:w-2/3 relative z-0">
+        <div className="flex-grow h-screen md:w-2/3 relative z-0">
+          {" "}
+          {/* Change here */}
           {/* Add Story Button */}
           <Link to="/addstory">
             <button
@@ -89,14 +93,13 @@ const Story = () => {
               <AiOutlinePlus className="text-2xl" />
             </button>
           </Link>
-
           {/* Map */}
           {lat && long ? (
             <MapContainer
               center={[lat, long]}
               zoom={13}
               scrollWheelZoom={false}
-              style={{ height: "100%", width: "100%" }}
+              style={{ height: "100vh", width: "100%" }}
             >
               <TileLayer
                 attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
@@ -124,67 +127,74 @@ const Story = () => {
             </MapContainer>
           ) : (
             <div className="flex justify-center items-center h-full">
-              <Loader/>
+              <Loader />
             </div>
           )}
         </div>
-
         {/* Custom Popup for Selected Video */}
         {selectedVideo &&
           createPortal(
             <div
               className="fixed inset-0 z-50 flex justify-center items-center p-4 bg-black bg-opacity-50"
-              onClick={closePopup} // Close the popup when clicking outside
+              onClick={closePopup}
             >
               <div
                 className="relative w-full max-w-md h-auto bg-white rounded-lg shadow-md overflow-y-auto"
-                onClick={handleVideoClick} // Prevent closing the popup when interacting with the video
+                onClick={handleVideoClick}
               >
-                <video
-                  ref={videoRef}
-                  className="w-full h-auto rounded-lg shadow-md"
-                  controls
-                  autoPlay
-                  volume={1}
-                  style={{ maxHeight: "60vh" }}
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)} // Update state on pause
-                >
-                  <source src={selectedVideo?.videoUrl} type="video/mp4" />
-                  <source
-                    src={selectedVideo?.video?.url}
-                    type="video/x-matroska"
+                {/* Determine if the media is a video or image */}
+                {selectedVideo?.videoUrl?.match(/\.(mp4|webm|ogg)$/i) ? (
+                  <video
+                    ref={videoRef}
+                    className="w-full h-auto rounded-lg shadow-md"
+                    controls
+                    autoPlay
+                    volume={1}
+                    style={{ maxHeight: "60vh" }}
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                  >
+                    <source src={selectedVideo?.videoUrl} type="video/mp4" />
+                    <source
+                      src={selectedVideo?.video?.url}
+                      type="video/x-matroska"
+                    />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <img
+                    src={selectedVideo?.videoUrl || selectedVideo?.video?.url}
+                    alt="Selected Story"
+                    className="w-full h-auto rounded-lg shadow-md"
+                    style={{ maxHeight: "60vh", objectFit: "cover" }}
                   />
-                  Your browser does not support the video tag.
-                </video>
+                )}
 
-                {isPlaying && (
-                  <>
-                    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 space-y-4">
-                      <div
-                        className=""
-                        onClick={() => handleLike(selectedVideo._id)}
-                      >
-                        {
-                        isLiked ? (
-                          
-                          <FcLike className="text-3xl hover:text-red-500" />
-                        ) : (
-                          <CiHeart 
-                            className={`text-3xl transition-transform ${
-                              animating ? "scale-125" : ""
-                            }`}
-                          />
-                        )}
-                        {/* Display video title */}
-                      </div>
+                {(isPlaying ||
+                  !selectedVideo?.videoUrl?.match(/\.(mp4|webm|ogg)$/i)) && (
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-3">
+                    {/* Like Button */}
+                    <div
+                      onClick={() => handleLike(selectedVideo._id)}
+                      className="cursor-pointer transform transition-transform duration-200 hover:scale-125"
+                      title={isLiked ? "Unlike" : "Like"}
+                    >
+                      {isLiked ? (
+                        <FcLike className="text-4xl drop-shadow-md" />
+                      ) : (
+                        <CiHeart
+                          className={`text-4xl text-white drop-shadow-md ${
+                            animating ? "scale-125" : ""
+                          }`}
+                        />
+                      )}
                     </div>
-                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 space-y-4">
-                      <div className="text-white text-lg font-semibold bg-black bg-opacity-60 px-4 py-2 rounded-md">
-                        {selectedVideo.title}
-                      </div>
+
+                    {/* Title */}
+                    <div className="text-white text-lg font-semibold bg-black bg-opacity-60 px-3 py-1 rounded-md shadow-md">
+                      {selectedVideo.title}
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             </div>,

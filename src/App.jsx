@@ -1,7 +1,8 @@
 import "./App.css";
 import React, { useState, useEffect } from "react"; // Use 'React' (capitalized) in imports
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Login from "./Pages/Authentication/Login";
+import ResetPassword from "./Pages/Authentication/ResetPassword";
 import Signup from "./Pages/Authentication/Signup"; // Ensure this is correct
 import Home from "./Pages/Home";
 import Landing from "./Pages/Landing";
@@ -27,8 +28,22 @@ import { axiosClient } from "./utils/axiosClient";
 import TravelAdvisor from "./Pages/TravelAdvisor";
 import Search from "./Pages/Search";
 import Loader from "./Components/Loader";
+
+import { KEY_ACCESS_TOKEN, getItem } from './utils/LocalStorageManager'
+import { setLoggedIn} from './Toolkit/slices/appConfigSlice';
+
 const REACT_APP_SERVER_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL;
 function App() {
+  const dispatch = useDispatch();
+  const token = getItem(KEY_ACCESS_TOKEN);
+  const status = useSelector((state) => state.appConfig.status);
+
+  useEffect(() => {
+    if (token && status === "idle") {
+      dispatch(getMyInfo());
+      dispatch(setLoggedIn(true));
+    }
+  }, [dispatch, token, status]);
   const myProfile = useSelector((state) => state.appConfig.myProfile);
   const userId = myProfile?._id;
   const [notifications, setNotifications] = useState([]);
@@ -63,18 +78,22 @@ function App() {
   useEffect(() => {
     if (!userId) return;
 
-    const newsocket = io("REACT_APP_SERVER_BASE_URL", { autoConnect: true });
+    const newsocket = io(REACT_APP_SERVER_BASE_URL, { autoConnect: true });
+
     newsocket.emit("join", userId);
+
     const handleNewNotification = (notification) => {
       const message = `${notification?.sender?.username} ${
         notificationMessages[notification?.type] || "performed an action!"
       }`;
       toasting(message);
-      setNotifications((prev) =>
-        [notification, ...prev].sort(
+      setNotifications((prev) => {
+        const isDuplicate = prev.some((n) => n._id === notification._id);
+        if (isDuplicate) return prev;
+        return [notification, ...prev].sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        )
-      );
+        );
+      });
     };
 
     newsocket.on("newNotification", handleNewNotification);
@@ -90,10 +109,12 @@ function App() {
       <Routes>
         <Route path="/underconstruction" element={<UnderConstruction />} />
         <Route path="/*" element={<PageNotFound />} />
+        <Route path="/post/:id" element={<Post />} />
         {/* Only show login/signup routes if the user is not logged in */}
         <Route element={<OnlyIfUserNotLoggedIn />}>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/signup" element={<Signup />} /> {/* Corrected */}
         </Route>
         {/* Other routes that require authentication */}
@@ -107,7 +128,7 @@ function App() {
           <Route path="/search" element={<Search />} />
           <Route path="/" element={<FeedLoad />}>
             <Route path="/forum" element={<Forum />} />
-            <Route path="/post/:id" element={<Post />} />
+            
           </Route>
           <Route path="/profile/:id" element={<Profile />} />
 

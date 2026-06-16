@@ -14,25 +14,31 @@ export const getStoryData = createAsyncThunk("/story/getstory", async () => {
 });
 
 export const likeAndUnlikeStory = createAsyncThunk(
-    "story/like",
-    async (body) => {
-      try {
-        const response = await axiosClient.post("/story/like", body);
-        console.log(response);
-        toast.success(response.data.message); 
-        return response.data;
-      } catch (error) {
-        toast.error(response.data.result.message); 
-        return Promise.reject(error);
-      }
+  "story/like",
+  async (body) => {
+    try {
+      const response = await axiosClient.post("/story/like", body);
+      console.log(response);
+      toast.success(response.data.message);
+      return response.data;
+    } catch (error) {
+      toast.error(response.data.result.message);
+      return Promise.reject(error);
     }
-)
+  }
+);
 
 const storySlice = createSlice({
   name: "story",
   initialState: {
     story: [],
     status: "idle",
+  },
+  reducers: {
+    addedStory: (state, action) => {
+      state.story.push(action.payload);
+      console.log(action.payload);
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(getStoryData.fulfilled, (state, action) => {
@@ -45,16 +51,15 @@ const storySlice = createSlice({
     builder.addCase(getStoryData.rejected, (state) => {
       state.status = "failed"; // Handle failed state
     });
-    builder
-          .addCase(likeAndUnlikeStory.fulfilled, (state, action) => {
-            const story = action.payload.story;
-            console.log(story);
-            const index = state.story.findIndex((item) => item._id === story._id);
-            if (index != -1) {
-              state.story[index] = story;
-            }
-          })
+    builder.addCase(likeAndUnlikeStory.fulfilled, (state, action) => {
+      const story = action.payload.story;
+      console.log(story);
+      const index = state.story.findIndex((item) => item._id === story._id);
+      if (index != -1) {
+        state.story[index] = story;
+      }
+    });
   },
 });
-
+export const { addedStory } = storySlice.actions;
 export default storySlice.reducer;

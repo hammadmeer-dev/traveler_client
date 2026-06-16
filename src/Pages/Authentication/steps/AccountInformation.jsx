@@ -9,34 +9,36 @@ const AccountInformation = ({ accountInfo, setAccountInfo }) => {
   });
 
   // Validate form inputs on change
-  const validateField = (id, value) => {
-    let error = "";
+  // Validate form inputs on change
+const validateField = (id, value) => {
+  let error = "";
 
-    // Username validation: should not be an email or empty
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (id === "username") {
-      if (!value.trim()) {
-        error = "Username is required";
-      } else if (emailPattern.test(value)) {
-        error = "Username cannot be an email address";
-      }
+  // Username validation: should not be an email or empty
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (id === "username") {
+    if (!value.trim()) {
+      error = "Username is required";
+    } else if (emailPattern.test(value)) {
+      error = "Username cannot be an email address";
     }
+  }
 
-    // Email validation: should follow a valid email pattern
-    if (id === "email" && !emailPattern.test(value)) {
-      error = "Please enter a valid email";
-    }
+  // Gmail-only email validation
+  const gmailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  if (id === "email" && !gmailPattern.test(value)) {
+    error = "Please enter a valid Gmail address (e.g. user@gmail.com)";
+  }
 
-    // Password validation: at least 6 characters long
-    if (id === "password" && value.length < 6) {
-      error = "Password must be at least 6 characters";
-    }
+  // Password validation: at least 6 characters long
+  if (id === "password" && value.length < 6) {
+    error = "Password must be at least 6 characters";
+  }
 
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [id]: error,
-    }));
-  };
+  setErrors((prevErrors) => ({
+    ...prevErrors,
+    [id]: error,
+  }));
+};
 
   // Handle input changes for username, email, and password
   const handleInputChange = (e) => {

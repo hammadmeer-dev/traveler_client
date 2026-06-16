@@ -8,6 +8,9 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import MoreInfoModal from "../Components/MoreInfoModel";
 import Loader from "../Components/Loader";
+import { toast } from "react-hot-toast";
+const ADVISOR_APP_SERVER_BASE_URL = import.meta.env
+  .VITE_TRAVEL_ADVISOR_BASE_URL;
 const TravelAdvisor = () => {
   const [province, setProvince] = useState("");
   const [destinationType, setDestinationType] = useState("");
@@ -25,11 +28,11 @@ const TravelAdvisor = () => {
   const provinces = [
     "Punjab",
     "Sindh",
-    "Khyber−Pakhtunkhwa",
+    "Khyber Pakhtunkhwa",
     "Balochistan",
     "Gilgit−Baltistan",
     "Islamabad",
-    "Azad−Kashmir",
+    "Azad Kashmir",
   ];
 
   const destinationTypes = [
@@ -51,36 +54,50 @@ const TravelAdvisor = () => {
   ];
 
   const handleSubmit = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `https://aae26050-01cf-47f0-b15c-7d6f334e28f6-00-25sw2s41mfz0l.pike.replit.dev:5000/recommend?district=${encodeURIComponent(
-          province
-        )}&category=${encodeURIComponent(destinationType)}`
-      );
+  setLoading(true);
+  try {
+    const response = await fetch(
+      `${ADVISOR_APP_SERVER_BASE_URL}/recommend?district=${encodeURIComponent(
+        province
+      )}&category=${encodeURIComponent(destinationType)}`
+    );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch recommendations");
+    const data = await response.json();
+
+    // Handle API-specific error responses
+    if (!response.ok) {
+      if (data.error === "Invalid district") {
+        toast.error("Invalid district");
+      } else if (data.error === "Invalid category") {
+        toast.error("Invalid category");
+      } else if (data.message === "No recommendations found") {
+        toast.error("No recommendations found");
+      } else {
+        toast.error("Something went wrong. Please try again.");
       }
-
-      const data = await response.json();
-      setResults(data); // assuming data is an array of recommendations
-    } catch (error) {
-      console.error("Error fetching recommendations:", error);
-      alert("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
+      return; // Exit early after showing error
     }
-  };
+
+    setResults(data); // Success - set the results
+
+  } catch (error) {
+    // Network error or unexpected error
+    toast.error("Something went wrong. Please try again.");
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>
       <Header />
-      <div className="max-h-max min-h-screen flex flex-col items-center justify-center bg-no-repeat bg-contain bg-center text-white py-10" 
-      style={{
-        backgroundImage:
-          "url('https://res.cloudinary.com/djiqzvcev/image/upload/v1751670820/Lovepik_com-380060060-travel-map-illustration-hand-painted-colorful-color_tuyiqw.png')",
-      }}
+      <div
+        className="max-h-max min-h-auto flex flex-col items-center justify-center bg-no-repeat bg-contain bg-center text-white mt-6 "
+        style={{
+          backgroundImage:
+            "url('https://res.cloudinary.com/djiqzvcev/image/upload/v1751670820/Lovepik_com-380060060-travel-map-illustration-hand-painted-colorful-color_tuyiqw.png')",
+        }}
       >
         <div className=" fixed w-full h-full top-0 left-0"></div>
 
@@ -137,52 +154,56 @@ const TravelAdvisor = () => {
           </button>
         </div>
 
-        {loading && (
-          <Loader/>
-        )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 relative z-10">
-          {results.map((place, index) => (
-            <div
-              key={index}
-              className="bg-black bg-opacity-40 p-4 rounded-lg backdrop-blur-lg shadow-lg w-80 relative"
-            >
-              {/* Map positioned on top */}
-              <div className="relative h-40 w-full">
-                <MapContainer
-                  center={[place.latitude, place.longitude]}
-                  zoom={13}
-                  style={{
-                    height: "100%",
-                    width: "100%",
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                  }}
-                >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  <Marker position={[place.latitude, place.longitude]}>
-                    <Popup>{place._key}</Popup>
-                  </Marker>
-                </MapContainer>
-              </div>
-              {/* Place title */}
-              <h2 className="text-xl font-bold mt-2">{place._key}</h2>
-              <p className="text-sm mt-1 truncate">{place.Desc}</p>
-              <p className="text-xs text-gray-300 mt-1">
-                {place.district} • Lat: {place.latitude.toFixed(3)} • Lng:{" "}
-                {place.longitude.toFixed(3)}
-              </p>
-              <button className="mt-2 text-blue-300 hover:underline" 
-            onClick={() => openModal(place)}>
-                More Info
-              </button>
-            </div>
-          ))}
-        </div>
         {selectedPlace && (
-        <MoreInfoModal place={selectedPlace} onClose={closeModal} />
-      )}
+          <MoreInfoModal place={selectedPlace} onClose={closeModal} />
+        )}
+      </div>
+      <div
+        className="flex flex-col items-center justify-center bg-no-repeat bg-contain bg-center text-white mt-6"
+      >
+        {loading && <Loader />}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10 mb-3">
+        {results.map((place, index) => (
+          <div
+            key={index}
+            className="bg-black bg-opacity-40 p-4 rounded-lg backdrop-blur-lg shadow-lg w-80 relative"
+          >
+            {/* Map positioned on top */}
+            <div className="relative h-40 w-full">
+              <MapContainer
+                center={[place.latitude, place.longitude]}
+                zoom={13}
+                style={{
+                  height: "100%",
+                  width: "100%",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                }}
+              >
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <Marker position={[place.latitude, place.longitude]}>
+                  <Popup>{place._key}</Popup>
+                </Marker>
+              </MapContainer>
+            </div>
+            {/* Place title */}
+            <h2 className="text-xl font-bold mt-2">{place._key}</h2>
+            <p className="text-sm mt-1 truncate">{place.Desc}</p>
+            <p className="text-xs text-gray-300 mt-1">
+              {place.district} • Lat: {place.latitude.toFixed(3)} • Lng:{" "}
+              {place.longitude.toFixed(3)}
+            </p>
+            <button
+              className="mt-2 text-blue-300 hover:underline"
+              onClick={() => openModal(place)}
+            >
+              More Info
+            </button>
+          </div>
+        ))}
+      </div>
       </div>
     </>
   );

@@ -6,7 +6,7 @@ import ProfileImage from "./ProfileImage"; // Ensure the path is correct
 import Carousel from "./Carousel";
 import { getUserProfile, toggleLike } from "../Toolkit/slices/userProfileSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { likeAndUnlikePost } from "../Toolkit/slices/feedSlice";
 import { FaShare } from "react-icons/fa";
 import { FaFacebookF, FaTwitter, FaWhatsapp, FaCopy } from "react-icons/fa";
@@ -15,11 +15,13 @@ import ReactStars from "react-rating-stars-component";
 
 const Post = ({ post, scrollToComment }) => {
   const myProfile = useSelector((state) => state.appConfig.myProfile);
+  const isLoggedIn = useSelector((state) => state.appConfig.isLoggedIn);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isPopupOpen, setIsPopupOpen] = useState(false); // State to manage popup visibility
   const [isCopied, setIsCopied] = useState(false);
   const postUrl = window.location.href;
+  const location = useLocation();
   console.log(post?.owner?.KoFiUrl);
   // Function to handle the opening of the popup
   const handleShareClick = () => {
@@ -97,17 +99,31 @@ const Post = ({ post, scrollToComment }) => {
 
             {/* Like and Comment Buttons */}
             <div className="flex items-center space-x-4 text-gray-600">
-              <button
-                type="button"
-                aria-label="Like post"
-                className={`flex items-center space-x-1 cursor-pointer ${
-                  post?.isLikedByUser ? "text-blue-500" : "text-gray-700"
-                } hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-150 ease-in-out rounded-full bg-slate-200 px-2 py-1`}
-                onClick={handleLike}
-              >
-                <AiOutlineLike className="text-xl" />
-                <p className="text-sm">{post?.likesCount}</p>
-              </button>
+              {isLoggedIn ? (
+                <button
+                  type="button"
+                  aria-label="Like post"
+                  className={`flex items-center space-x-1 cursor-pointer ${
+                    post?.isLikedByUser ? "text-blue-500" : "text-gray-700"
+                  } hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-150 ease-in-out rounded-full bg-slate-200 px-2 py-1`}
+                  onClick={handleLike}
+                >
+                  <AiOutlineLike className="text-xl" />
+                  <p className="text-sm">{post?.likesCount}</p>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  aria-label="Like post"
+                  className={`flex items-center space-x-1 cursor-pointer ${
+                    post?.isLikedByUser ? "text-blue-500" : "text-gray-700"
+                  } hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-150 ease-in-out rounded-full bg-slate-200 px-2 py-1`}
+                  onClick={() => navigate("/login", { state: { from: location }, replace: true })}
+                >
+                  <AiOutlineLike className="text-xl" />
+                  <p className="text-sm">{post?.likesCount}</p>
+                </button>
+              )}
               <button
                 type="button"
                 aria-label="Comment on post"
@@ -134,7 +150,10 @@ const Post = ({ post, scrollToComment }) => {
                 isHalf={true}
                 activeColor="#ffd700"
               />
-              <span> {formattedHashtags? "|": ""} {formattedHashtags}</span>
+              <span>
+                {" "}
+                {formattedHashtags ? "|" : ""} {formattedHashtags}
+              </span>
             </p>
 
             {post?.media?.length > 0 ? <Carousel data={post?.media} /> : ""}
@@ -148,9 +167,14 @@ const Post = ({ post, scrollToComment }) => {
           </div>
 
           {/* Location Information */}
-          <div className="mt-4 flex items-center text-gray-700 cursor-pointer" onClick={() => navigate(`/search?query=${encodeURIComponent(post?.location)}`)}>
+          <div
+            className="mt-4 flex items-center text-gray-700 cursor-pointer"
+            onClick={() =>
+              navigate(`/search?query=${encodeURIComponent(post?.location)}`)
+            }
+          >
             <CiLocationOn className="text-lg mr-1" />
-            <p className="text-sm" >{post?.location}</p>
+            <p className="text-sm">{post?.location}</p>
           </div>
           <div className="mt-4 flex items-center justify-end text-gray-700 gap-5">
             {post?.owner?.koFiUrl ? (

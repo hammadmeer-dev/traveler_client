@@ -7,21 +7,20 @@ import { followAndUnfollowUser } from "../Toolkit/slices/userProfileSlice";
 const ProfileCard = ({ user }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [isFollowing,setIsFollowing] = useState(false)
+  const [isFollowing, setIsFollowing] = useState(false);
   const myProfile = useSelector((state) => state.appConfig.myProfile);
   const [owner, setOwner] = useState(false);
 
   useEffect(() => {
     if (!user?._id || !myProfile?._id) return;
     setOwner(user._id === myProfile._id);
-    const isUserFollowed = myProfile?.following?.some(
-    (followedUser) =>
+    const isUserFollowed = myProfile?.following?.some((followedUser) =>
       typeof followedUser === "string"
         ? followedUser === user._id
         : followedUser._id === user._id
-  );
+    );
 
-  setIsFollowing(isUserFollowed);
+    setIsFollowing(isUserFollowed);
   }, [user, myProfile]);
 
   const handleProfileClick = () => {
@@ -49,7 +48,9 @@ const ProfileCard = ({ user }) => {
             />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">{user?.fullname}</h3>
+            <h3 className="text-lg font-semibold text-gray-800">
+              {user?.fullname}
+            </h3>
             <p className="text-sm text-gray-500">@{user?.username}</p>
           </div>
         </div>
@@ -57,7 +58,11 @@ const ProfileCard = ({ user }) => {
         {!owner && (
           <button
             onClick={handleFollow}
-            className="bg-blue-500 text-white px-4 py-2 text-sm rounded-xl hover:bg-blue-600"
+            className={`${
+              isFollowing
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-blue-500 hover:bg-blue-600"
+            } text-white px-4 py-2 text-sm rounded-xl`}
           >
             {isFollowing ? "Unfollow" : "Follow"}
           </button>

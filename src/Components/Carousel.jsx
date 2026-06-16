@@ -32,7 +32,7 @@ const Carousel = ({data}) => {
                         key={index}
                         src={slide.url}
                         alt={`Slide ${index + 1}`}
-                        className="w-full h-full object-contain flex-shrink-0"
+                        className="w-full h-full object-cover flex-shrink-0"
                     />
                 ))}
             </div>

@@ -17,31 +17,35 @@ const Search = () => {
   const [sortOrder, setSortOrder] = useState("latest"); // latest | oldest
   const query = searchParams.get("query");
 
-  const handleSearch = () => {
-    const trimmedQuery = searchTerm.trim();
-    if (trimmedQuery) {
-      setSearchParams({ query: trimmedQuery });
+const handleSearch = () => {
+  const trimmedQuery = searchTerm.trim();
+  if (trimmedQuery) {
+    const encoded = encodeURIComponent(trimmedQuery);
+    setSearchParams({ query: encoded });
+  }
+};
+
+useEffect(() => {
+  if (!query) return;
+
+  const decodedQuery = decodeURIComponent(query);
+  setSearchTerm(decodedQuery);
+
+  const fetchResults = async () => {
+    setLoading(true);
+    try {
+      const res = await axiosClient.get(`/post/search?query=${encodeURIComponent(decodedQuery)}`);
+      setSearchResults(res.data.result);
+    } catch (err) {
+      console.error("Search failed:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    setSearchTerm(query || "");
-    if (!query) return;
+  fetchResults();
+}, [query]);
 
-    const fetchResults = async () => {
-      setLoading(true);
-      try {
-        const res = await axiosClient.get(`/post/search?query=${query}`);
-        setSearchResults(res.data.result);
-      } catch (err) {
-        console.error("Search failed:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchResults();
-  }, [query]);
 
   // Helper: Parse "timeAgo" strings like "2 hours ago" into minutes
   const parseTimeAgo = (timeAgo) => {
@@ -89,7 +93,7 @@ const Search = () => {
     <div className="bg-gray-100 min-h-screen">
       {/* Header Section */}
       <div className="md:min-h-24 min-h-16 bg-gradient-to-r from-blue-400 to-teal-400 text-white py-4 text-center">
-        <h1 className="text-2xl font-semibold">Search</h1>
+        
       </div>
 
       {/* Search Bar */}
@@ -130,9 +134,9 @@ const Search = () => {
   {/* Sort dropdown only if filtering posts */}
   {filter === "posts" && (
     <>
-      <span className="text-gray-500 mx-2">|</span>
+      <span className="text-gray-500 md:mx-2 mx-1">|</span>
       <select
-        className="border border-gray-300 rounded-lg px-3 py-1 text-gray-700"
+        className="border border-gray-300 rounded-lg md:px-3 px-2 py-1 text-gray-700"
         value={sortOrder}
         onChange={(e) => setSortOrder(e.target.value)}
       >
